@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import pymongo
-
 db = pymongo.Connection("localhost", 27017).tweets
 
 for tweet in db.tweets.find():#.limit(10)#({'id':12294922859})
@@ -21,29 +20,11 @@ for tweet in db.tweets.find():#.limit(10)#({'id':12294922859})
         url_text = url['url'].lower() 
         text = text.replace(url_text, '')
 
-    text = text.replace("\n",' ').replace(' ','S').replace(':','C')
+    text = text.replace("\n",' ').strip()
+    lang = tweet['user']['lang']
+    tweet_id = tweet['id']
 
-    bigrams = set()
-    for i in range(0,len(text)-1):
-        bigrams.add(text[i:i+2])
-
-    trigrams = set()
-    for i in range(0,len(text)-2):
-        trigrams.add(text[i:i+3])
-
-    # build up vowpal example
-    eg = ""
-
-    if tweet['user']['lang']=='en':
-        eg += '1'
-    else:
-        eg += '0'
-      
-    eg += ' id_' + str(tweet['id'])  
-    eg += '|bigrams ' + ' '.join(bigrams)
-    eg += ' |trigrams ' + ' '.join(trigrams)
-
-    print eg.encode('utf-8')
+    print "\t".join([str(tweet_id), lang, text]).encode('utf-8')
 
 
 
