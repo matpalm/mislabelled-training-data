@@ -146,13 +146,87 @@ so not a huge difference...
 and the disagreement of the model is less and less..
 * another graph of magnitude of error *
 
-iterate
- - x5 evalulate
- - graph of magnitude of top 100 disagreements
- - top100 'en' cases set to non_en; or limit to just maybe 'en' cases where disagreement > 2?
- - start again
+# stop mongo
+rm -rf db; mkdir db
+# start mongo
+zcat ../sample.2011-09-24-2.json.gz | head -n100000 | ./load_into_mongo.py
+
+./evaluate.sh 1
+./evaluate.sh 2
+...
+./evaluate.sh 9
+
+ r1 = data.frame(acc=read.delim('accuracy.1',header=F)$V1, run='r1')
+ r2 = data.frame(acc=read.delim('accuracy.2',header=F)$V1, run='r2')
+ r3 = data.frame(acc=read.delim('accuracy.3',header=F)$V1, run='r3')
+ r4 = data.frame(acc=read.delim('accuracy.4',header=F)$V1, run='r4')
+ r5 = data.frame(acc=read.delim('accuracy.5',header=F)$V1, run='r5')
+ r6 = data.frame(acc=read.delim('accuracy.6',header=F)$V1, run='r6')
+ r7 = data.frame(acc=read.delim('accuracy.7',header=F)$V1, run='r7')
+ r8 = data.frame(acc=read.delim('accuracy.8',header=F)$V1, run='r8')
+ r9 = data.frame(acc=read.delim('accuracy.9',header=F)$V1, run='r9')
+ d = rbind(r1,r2,r3,r4,r5,r6,r7,r8,r9)
+ ggplot(d, aes(run,acc)) + geom_boxplot()  
+ # acc_vs_run.png
+ 
+ r1 = data.frame(disagreement=read.delim('disagreements.1',header=F)$V1, run='r1')
+ r2 = data.frame(disagreement=read.delim('disagreements.2',header=F)$V1, run='r2')
+ r3 = data.frame(disagreement=read.delim('disagreements.3',header=F)$V1, run='r3')
+ r4 = data.frame(disagreement=read.delim('disagreements.4',header=F)$V1, run='r4')
+ r5 = data.frame(disagreement=read.delim('disagreements.5',header=F)$V1, run='r5')
+ r6 = data.frame(disagreement=read.delim('disagreements.6',header=F)$V1, run='r6')
+ r7 = data.frame(disagreement=read.delim('disagreements.7',header=F)$V1, run='r7')
+ r8 = data.frame(disagreement=read.delim('disagreements.8',header=F)$V1, run='r8')
+ r9 = data.frame(disagreement=read.delim('disagreements.9',header=F)$V1, run='r9')
+ d = rbind(r1,r2,r3,r4,r5,r6,r7,r8,r9)
+ gplot(d, aes(1:100,disagreement, group=run)) + geom_line(aes(colour=run)) + facet_grid(~run) + xlab('index')
+
+ # disagreement_vs_index.png
+
+doesnt actually look that good so try something simpler...
+
+ reload data
+ ./evaluate.sh 10a
+ ./tweet_lang_text.py > tweet_lang_text.tsv
+ grep -f non_english_chars tweet_lang_text.tsv | cut -f1 | ./set_tweet_lang.py not_en
+ rm data.vw
+ ./evaluate.sh 10b
+
+ r10a = data.frame(acc=read.delim('accuracy.10a',header=F)$V1, run='r10a')
+ r10b = data.frame(acc=read.delim('accuracy.10b',header=F)$V1, run='r10b')
+ d = rbind(r10a,r10b)
+ ggplot(d, aes(run,acc)) + geom_boxplot()
+
+117683592905232384	 9.931163	-8.931163	1.0	en	k5na	@aikonoiland なにげにおしゃまさんも好き、トゥーティッキ。通常子安は痒いけど、画面がスナフキンだとなんかもうあれだね、世界情勢のいざこざまで全て許せる。それくらいこころが広くなれる。愛って大事だよねとか普通に言える。シラミの卵でもわかる愛の形を教えてくれるムムリク族。
+117686768001757184	 9.142681	-8.142681	1.0	en	anecon	リキッドでSBTRKTめっちゃよかった。渾身のライブだったと思う。聴きたかった曲一通り聴けたし前で聞いたけど後ろまで盛り上がってて、アレンジも効いててアンコールの一曲もあって特に大阪みたいに短くは感じなかったよ。エモさに浸りながらもたっぷり動けてスッキリやで。
+117676898812837888	 8.037859	-7.037859	1.0	en	tozaki	ま、ある意味戦略といってしまえば戦略。それを責めるのは青臭いと一蹴してもよい。評価が多次元で不明瞭なフィールドに一歩踏み込むだけで、周りに惑わされて小難しく論じようとする。そこで汎用性を求める必要はないし、同調する必要も無い。
+117685807518715904	 7.771722	-6.771722	1.0	en	satokotherese	MJが天国に帰ってから2年。ようやく、何でか知らないけれど、This Is It を見ることができた。MJは中学時代の私にとって大事な存在で、しょっちゅう聞かなくなっても、愛するアーティストであった事に変わりはなかったことを、皮肉にも彼の死で知った。
+117687481025052672	 7.540459	-6.540459	1.0	en	naokimed	イギリスに行くので、ガイドブックを買ってきた。今日行った本屋は結構大きいのだけど、イギリス関係のガイドブックはロンドンに集中してた。たしかに、フランスでイギリスは観光地としてのイメージがない気がする。パリからロンドンに行く人はかなりいると思うけど。
+
+
+117675422409424897	5.702881	5.702881	0.0	ko	LycansPresent	호날두는 이제 완전히 어른이 되어 버린 것 같다. 얼굴에 나잇살이 붙었는지 부드러움이 있어 보이고 더욱 멋지게 변했네. 메시 날두 루니 내 또래 애들은 성장곡선의 정점에 가까이 올라가고 있는데 난 왜 점점 시간에 잠식당해가냐. 급반등 기대해 봅니다.
+117687803973869568	5.140752	5.140752	0.0	ko	xgirl_bot	사실 카톡이 친구추천 하는 것 따위 필요 없어. 어차피 네 번호도 알고 네 집도 알고 네가 심심하면 어디서 뭐 하고 노는지 내가 다 아는데. 이렇게 되면 손모가지가 아니라 발모가지라도 분질러야 할까.
+117675191697539073	5.071322	5.071322	0.0	ru	Volchica11	Поняла …что Она совсем не нужна Ему. Поняла… что ожидала от Него того…чего он не может дать. Не хватило всего лишь самой малости…
+117679964819693568	5.047944	5.047944	0.0	ru	forever_in_hell	меня бесят когда говорят что уже ничего нельзя не изменить УЕБОК ЗАКРОЙ РОТ БЛЯТЬ ВСЕ МОЖНО ИЗМЕНИТЬ ЭТОГО ТОЛЬКО НАДО СИЛЬНО ЗАХОТЕТЬ И ВСЕ
+117685773955895296	4.650966	4.650966	0.0	ko	thisisthat777	@constellayoom ㅍㅎㅎㅎㅎㅎㅎㅎㅎ 책하고 음반을... 도와 드릴 수도 없고ㅋ 잔영이 오래 남아 괴롭게 하는군요. 안 좋은건 보지도 가까이도 안 하는게 좋죠. 저도 잔영은 오래 가는 편인데 거기에 스스로 편집해~-^);; 좀극대화 해보는데ㅋ
 
 
  
-caught in the traffic. coding would be easier. if bus didnt bounce. #haiku
+117674839392796675	2.865339	-1.865339	1.0	en	Kyle_EH_EM	@illias_van  เกย์ลีน -  อื้ออออ ม...ไม่ถึงขนาดนั้นหรอกค่ะ  ,,&gt;  &lt;,,   *จับแก้มตัวเอง*
+117686109475053568	2.735102	-1.735102	1.0	en	Bothtwice	RT @js100radio: 02.20น.เพลิงไหม้ โลตัส เอ็กซ์เพรส หน้า ม.รัตนโกสินทร์ 200 ปี ถ.รังสิต-ปทุม
+117675921510645761	2.70498		-1.70498	1.0	en	krufiat		ไปที " เปิดหลักสูตรสนทนา Chameleon Man 40 ชม.เต็ม " เวลา 9 ตุลาคมตั้งแต่ 13:00 ถึง 15:00 เพิ่มเติม . หลักสูตร... http://t.co/Th9r8w4r
+117673325265821696	2.657126	-1.657126	1.0	en	alteefnews	بقلم :( د .عبده الدباني) أيها الجنوبيون:تقاربوا..سووا صفوفكم..استووا...ينصركم الله - شبكة الطيف الإخبارية: http://t.co/FmlK7LqJ via @AddThis
+117680782704783360	2.645035	-1.645035	1.0	en	Tyatyamaru48	@tgsk48 １３期生過去最多の３３人ですか 個人的には誰ひとり欠けることなく研究生として 見れることを願ってます
 
+
+117678538768908290	2.281852	2.281852	0.0	it	nuclearmission	AHHHH my brother made it into Senior Regional Orchestra! He doesn't know seating yet but I'm so happy for him. He really needed this.
+117683253174992896	2.160351	2.160351	0.0	es	sayno_tofood	soo... i just realize i lost 1 pound... that makes me super happy!!! like if i keep losing 1 pound a week i'll make it to my goal
+117681994892197888	2.155557	-1.155557	1.0	en	ankostis	RT @comzeradd: RT @chimeres Η πιο όμορφη κατάληψη http://t.co/NrNDMLjC | η οποία διαλύθηκε προσφάτως απ τις "αρχές" http://t.co/3F2Kcgxr
+117682821165883392	2.154213	2.154213	0.0	es	allier77	RT @YoNoMeExplico: DA RT SI TE GUSTA LA: █▀░█▀█░█▀░█▀█░░█▀░█▀█░█░░█▀█░ █░░█░█░█░░█▀█░░█░░█░█░█░░█▀█░ ▀▀░▀▀▀░▀▀░▀░▀░░▀▀░▀▀▀░▀▀░▀░▀░
+117673706947485696	2.145417	2.145417	0.0	es	ecuaselenator	RT @MyHomeGirlSel: Im really glad that Selena's happy with justin! She's smiling all the time and that makes me happy! SELENA OWNS THE N ...
+
+117675401425334273	2.362696	-1.362696	1.0	en	Lartis2010	\"Книга о Прашкевиче, или От Изысканного жирафа до Белого мамонта\" выходит в издательстве \"Шико\" http://t.co/Q9H3YvsO
+117681730621673472	2.360148	-1.360148	1.0	en	ivannovi	впереди в сегодняшней программе - просмотр фильма "Ирина Палм сделает это лучше" и спаааать)
+117678115160997888	2.33375		-1.33375	1.0	en	momokoly	มันถูกกำหนกไว้แล้ว ให้เราได้พบ"กัน"(:
+117680325534023680	2.266024	-1.266024	1.0	en	max_whitewizard	"Лилль" сыграл вничью с "Лорьяном", "Лион" переиграл "Бордо" - Футбол  http://t.co/8KhAemx0
+117675321725173760	2.112755	-1.112755	1.0	en	Hoseki_JEGirl	@pammeemy @tukkatakashita ฮ่าๆ มันสุนกน้า วันนี้พี่ก็เลนไป5ชัวโมง กีากก
