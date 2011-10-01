@@ -9,38 +9,39 @@ then
 fi
 
 function evaluate_once {
- mkdir wip/$1
- cd wip/$1
- ln -s ../../data.vw
- shuf data.vw | nice vw -f model --quiet
- cat data.vw | nice vw -t -i model -p predictions -r raw_predictions --quiet
- cat data.vw | cut -d' ' -f1-2 | sed -es/\|.*// > labels_with_ids.actual
- cat data.vw | cut -d' ' -f1 > labels.actual
+ rm -rf wip_$1
+ mkdir wip_$1
+ cd wip_$1
+ shuf ../data.vw | nice vw -f model --quiet
+ cat ../data.vw | nice vw -t -i model -p predictions -r raw_predictions --quiet
  cat predictions | cut -d' ' -f1 > labels.predicted
- perf -ACC -files labels.{actual,predicted} -t 0.5 | awk '{print $2}' >> accuracy
+ # measure ACC performance
+ perf -ACC -files ../labels.actual labels.predicted -t 0.5 | awk '{print $2}' >> accuracy
+ # measure disagreement, per tweet
+ ../prediction_error.py ../labels_id.actual raw_predictions | sort > id_predictionerrors
 }
 
 echo "building data..."
 ./tweets_to_vowpal.py > data.vw
+cat data.vw | cut -d' ' -f1,2 | sed -es/\|.*// > labels_id.actual
+cat labels_id.actual | cut -d' ' -f1 > labels.actual
 
 echo "evaluating; run $1"
-rm -rf wip
-mkdir wip
 for i in {1..10}; do
  evaluate_once $i &
 done
 wait
+
+# gather accuracies into one file
 :> accuracy.$1
-find wip -name accuracy -exec cat {} \; >> accuracy.$1
+find wip* -name accuracy -exec cat {} \; >> accuracy.$1
 head -n3 accuracy.$1
 
-echo "calculating disagreement"
-cat data.vw | cut -d' ' -f1-2 | sed -es/\|.*// > labels_with_ids.actual
-./prediction_error.py labels_with_ids.actual wip/1/raw_predictions | sort -k2 -nr > disagreements.$1.out
-head -n5 disagreements.$1.out
-cut -f2 disagreements.$1.out | head -n100 > disagreements.$1
-rm labels_with_ids.actual 
+# calculate mean square errors for each tweet
+:> id_mse.$1
+find wip* -name id_predictionerrors | xargs sort -m | ./mse.py | sort -k2 -nr > id_mse.$1
+head -n3 id_mse.$1
 
-echo "flipping language for top 100"
-cut -f1 disagreements.$1.out | head -n100 | ./flip_tweet_lang.py > flip.out
-head -n3 flip.out
+# flip language for top 100
+#cut -p1 id_mse.$1 | head -n100 | cut -f1 | ./flip_tweet_lang.py > flip.out
+#head -n3 flip.out

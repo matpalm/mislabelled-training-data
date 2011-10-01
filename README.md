@@ -30,7 +30,7 @@ first we need some tweets. we'll load this into <a>mongodb</a> because it fits w
 the code i've been using for the diy twitter client but all this could easiest be done without it.
 
  mongod --dbpath=db &
- mongo ensure_tweet_id_indexed.js
+ mongo db ensure_tweet_id_indexed.js
 
 (
  mongo tweets
@@ -57,9 +57,7 @@ so we can format for vowpal (since we don't care about the actual character mean
 
 we can now train a vowpal model using this data as a training set
 
- mkdir wip; cd wip
- ln -s ../data.vw
-  shuf data.vw | vw -f model
+ shuf data.vw | vw -f model
 
 and then apply the model to the <em>same data</em> as a test set 
 
@@ -84,11 +82,12 @@ raw prediction     -1.06215 # model agrees, _definitely_ not english
 
 just out of interest we can check the "accuracy" of this model using <a>perf</a>. given the hack we're doing of testing
 against the training data it's not really an accuracy, more of an "agreement" with the original data.
+
  cat data.vw | cut -d' ' -f1 > labels.actual
  cat predictions | cut -d' ' -f1 > labels.predicted
  perf -ACC -files labels.{actual,predicted} -t 0.5 | awk '{print $2}'
 
-training the model from scratch (since it involves a shuffle) x10 times gives
+we can do all this; training the model from scratch (since it involves a shuffle) x10 times giving
 
 > summary(d$V1)
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
@@ -96,34 +95,35 @@ training the model from scratch (since it involves a shuffle) x10 times gives
 > d$V1
  [1] 0.82496 0.81260 0.82690 0.82654 0.82454 0.82354 0.82078 0.82023 0.82120 0.81990
 
-so it's pretty good.
+( this x10 run is done using ./evaluate.sh 1 )
 
-what's more interesting is the cases the model doesn't agree with the label but is actually right
+so it's not too bad...
+
+what's more interesting that the cases were the model agreed are the cases the model <b>doesn't</b> agree
+
+in some cases the model disagrees and is actually right
 
 text: [천국이 RT이벤트]2011 대한민국 소비자신뢰 대표브랜드 대상수상! 알바천국이 여러분의 사랑에힘입어
-marked as english? 1.0 # yes (hmmm)
-prediction:        -0.52598 # ie model disagrees it's english
-error:             1.52598
+user lang:  en (label 1) # hmmm, not sure this is in english :/
+prediction: -0.52598 # ie model thinks it's not english
+error:      1.52598
 
-this is great! the model has correctly identified this instance is mislabelled. in fact the top 200+ are
-cases like this, a tweet marked as 'en' that isn't.
+this is great! the model has correctly identified this instance is mislabelled. 
 
-looks pretty clean; ranked the tweets the model disagrees with and we see the top 500 don't even include a single 
-latin character but are all marked 'en'
+but sometimes the model disagrees and is wrong...
 
-* GRAPH of magnitude of error *
-sh
- cut -f2,5 disagreements.out > d
-R
- d = read.delim('d',header=F)
- names(d) <- c('d','lang')
- d$index = 1:nrow(d)
+text: поняла …что она совсем не нужна ему.
+user lang:  ru (label 0) # fair enough, looks russian to me..
+prediction: 5.528163 # model strongly thinks it's english
+error:      5.528163
 
-some examples include...
-prediction tweet
--6.823713 メモ☞芸能人目撃談、関西の高校生にもっさん赤っ恥w、藤原家おまごちゃんパワー♡、、、もう思い出せん(^_^
--5.375258 "やはり東電は破綻させて一時国有化し、現行の経営陣を入れ替えた上で、すべての情報を強制的に開示
--4.571936 พักนี้หลังจากอัลบั้มใหม่ของเจย์-ซี+คานเยเวสต์ ก็ฟังแต่เพลงโซลแฮะ
+we can in fact consider the top20 "misclassified" tweets using
+
+ head -n100 id_mse.1 |cut -f1 |sed -es/id_// > ids
+ grep -f ids tweet_lang_text.tsv
+
+
+
 
 ( recall a prediction < 0.5 denotes not english & > 0.5 denotes english so in these cases the model
  _strongly_ disagrees with these being english )
