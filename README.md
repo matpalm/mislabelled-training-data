@@ -1,8 +1,8 @@
-## post
+## README
 
 see http://matpalm.com/blog/2011/10/03/mislabelled-training-data for a blog post
 
-## method 
+## RANDOM NOTES FOLLOW (YOU WERE WARNED!!!!!!!)
 
 using mongo as underlying tweet store
 
