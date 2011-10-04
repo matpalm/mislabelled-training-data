@@ -1,4 +1,4 @@
-#!w/usr/bin/env python
+#!/usr/bin/env python
 import sys,math
 
 last_tid = None
