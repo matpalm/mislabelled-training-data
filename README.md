@@ -87,19 +87,18 @@ so it seems that there are enough russian tweets marked as english for it to be 
 ** this aside if we just agree with the model, mark the top 100 as the model says and reiterate say 10 times 
 do the model get better?
 
- r1 = read.delim('eval.1/accuracy',header=F)$V1
- r2 = read.delim('eval.2/accuracy',header=F)$V1
- r3 = read.delim('eval.3/accuracy',header=F)$V1
- r4 = read.delim('eval.4/accuracy',header=F)$V1
- r5 = read.delim('eval.5/accuracy',header=F)$V1
- r6 = read.delim('eval.6/accuracy',header=F)$V1
- r7 = read.delim('eval.7/accuracy',header=F)$V1
- r8 = read.delim('eval.8/accuracy',header=F)$V1
- r9 = read.delim('eval.9/accuracy',header=F)$V1
- r10 = read.delim('eval.10/accuracy',header=F)$V1
- d = stack(list(r01=r1,r02=r2,r03=r3,r04=r4,r05=r5,r06=r6,r07=r7,r08=r8,r09=r9,r10=r10))
- ggplot(d, aes(ind,values)) + geom_boxplot() + xlab('run') + ylab('ACC')
- # acc_vs_run.png
+    r1 = read.delim('eval.1/accuracy',header=F)$V1
+    r2 = read.delim('eval.2/accuracy',header=F)$V1
+    r3 = read.delim('eval.3/accuracy',header=F)$V1
+    r4 = read.delim('eval.4/accuracy',header=F)$V1
+    r5 = read.delim('eval.5/accuracy',header=F)$V1
+    r6 = read.delim('eval.6/accuracy',header=F)$V1
+    r7 = read.delim('eval.7/accuracy',header=F)$V1
+    r8 = read.delim('eval.8/accuracy',header=F)$V1
+    r9 = read.delim('eval.9/accuracy',header=F)$V1
+    r10 = read.delim('eval.10/accuracy',header=F)$V1
+    d = stack(list(r01=r1,r02=r2,r03=r3,r04=r4,r05=r5,r06=r6,r07=r7,r08=r8,r09=r9,r10=r10))
+    ggplot(d, aes(ind,values)) + geom_boxplot() + xlab('run') + ylab('ACC')
 
 acc_vs_run.png
 
@@ -168,7 +167,7 @@ after doing this how does the classifier do?? without having to iterate
 
 before_and_after_lang_set.png
 
- no need for a t-test to see it's better... 
+no need for a t-test to see it's better... 
 
 
 
